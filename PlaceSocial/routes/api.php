@@ -36,7 +36,7 @@ Route::group(['middleware' => 'auth:api'], function() {
 	Route::post('articles/{article}/update', 'ArticleController@update');
 
 	//delete item
-	Route::get('articles/{article}/delete', 'ArticleController@delete');
+	Route::post('articles/{article}/delete', 'ArticleController@delete');
 });
 
 
@@ -50,3 +50,5 @@ Route::group(['middleware' => 'auth:api'], function() {
 Route::post('register', 'Auth\RegisterController@register');
 // login 
 Route::post('login', 'Auth\LoginController@login');
+// logout
+Route::post('logout', 'Auth\LoginController@logout');
