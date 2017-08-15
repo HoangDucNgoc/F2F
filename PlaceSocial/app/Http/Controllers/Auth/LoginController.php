@@ -30,7 +30,7 @@ class LoginController extends Controller
      */
     protected $redirectTo = '/home';
 
-    public function login(Request $request)
+    /*public function login(Request $request)
     {
         $this->validateLogin($request);
 
@@ -59,8 +59,8 @@ class LoginController extends Controller
         }
 
         return response()->json(['data' => 'User logged out.'], 200);
-    }
-
+    }*/
+    
     /**
      * Create a new controller instance.
      *

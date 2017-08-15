@@ -22,33 +22,34 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 | API method endpoints
 |======================================================
 */
-Route::group(['middleware' => 'auth:api'], function() {
+Route::group(['middleware' => 'auth:api', 'prefix' => '/v1'], function() {
 	// read all records 
-	Route::get('articles', 'ArticleController@index');
+	Route::get('/articles', 'ArticleController@index');
 
 	// show item's detail
-	Route::get('articles/{article}', 'ArticleController@show');
+	Route::get('/articles/{article}', 'ArticleController@show');
 
 	//insert item
-	Route::post('articles', 'ArticleController@store');
+	Route::post('/articles', 'ArticleController@store');
 
 	//update item
-	Route::post('articles/{article}/update', 'ArticleController@update');
+	Route::post('/articles/{article}/update', 'ArticleController@update');
 
 	//delete item
-	Route::post('articles/{article}/delete', 'ArticleController@delete');
+	Route::get('/articles/{article}/delete', 'ArticleController@delete');
+	
 });
 
-
+Route::get('/logout', 'LoginController@logout');
 /*
 |=============================================
 | API Authorization with token API
 |=============================================
 */
 
-// register auth
-Route::post('register', 'Auth\RegisterController@register');
-// login 
-Route::post('login', 'Auth\LoginController@login');
-// logout
-Route::post('logout', 'Auth\LoginController@logout');
+Route::group(['middleware' => 'cors', 'prefix' => '/v1'], function () {
+
+    Route::post('/login', 'UserController@authenticate');
+
+    Route::post('/register', 'UserController@register');
+});

@@ -40,12 +40,12 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
-    protected function registered(Request $request, $user)
+    /*protected function registered(Request $request, $user)
     {
         $user->generateToken();
 
         return response()->json(['data' => $user->toArray()], 201);
-    }
+    }*/
     /**
      * Get a validator for an incoming registration request.
      *
@@ -67,12 +67,12 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \App\User
      */
-    protected function create(array $data)
+    /*protected function create(array $data)
     {
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
-    }
+    }*/
 }
