@@ -22,7 +22,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 | API method endpoints
 |======================================================
 */
-Route::group(['middleware' => 'auth:api', 'prefix' => '/v1'], function() {
+Route::group(['middleware' => 'token'], function() {
 	// read all records 
 	Route::get('/articles', 'ArticleController@index');
 
@@ -40,7 +40,7 @@ Route::group(['middleware' => 'auth:api', 'prefix' => '/v1'], function() {
 	
 });
 
-Route::get('/logout', 'LoginController@logout');
+Route::get('/logout', 'UserController@logout');
 /*
 |=============================================
 | API Authorization with token API

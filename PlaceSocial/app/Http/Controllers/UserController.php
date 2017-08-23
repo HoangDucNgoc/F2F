@@ -109,17 +109,14 @@ class UserController extends ApiController
 
         $user = JWTAuth::toUser($token);
 
-        //$user->api_token = $token; ---> lưu token tạo bằng JWT vào api_token 
-        $user->api_token = str_random(191); // ---> tạo và lưu bằng tay 
-        $user->save();
+        // create token with expired date
+        $user->authorizingToken();
 
         return $this->respond([
 
             'status' => 'success',
             'status_code' => $this->getStatusCode(),
             'message' => 'Login successful!',
-            'JWTtoken' => $token,
-            //'Auth' => $accessToken,
             'data' => $this->userTransformer->transform($user)
 
         ]);
@@ -175,38 +172,33 @@ class UserController extends ApiController
      * @param: null
      * @return: Json String response
      */
-    public function logout()
+    public function logout(Request $request)
     {
-        //try{
-        	$accessToken = Request::header('Authorization');
+        	if($accessToken = $request->header('Authorization'))
+        	{
+        		$user = User::where('api_token', $accessToken)->first();
 
-            $user = User::where('api_token', $accessToken)->first();
-            if($user)
-            {
-				$user->api_token = NULL;
+	            if($user)
+	            {
+					$user->disableAuthorization();
 
-            	$user->save();
+	            	return $this->respond([
 
-            	//JWTAuth::setToken($api_token)->invalidate();
+	            		'status' => 'success',
+	            		'message' => 'User logged out successful!'
 
-            	//$this->setStatusCode(Res::HTTP_OK);
-
-            	return response()->json(null, 204);
-            }
+	            	]);
+	            }
             
-            else
-            {
-				return $this->respondWithError('User not logged in yet!');
-            }
-            	
-
-
-        /*}catch(JWTException $e){
-
-            return $this->respondInternalError("An error occurred while performing an action!");
-
-        }*/
-
+	            else
+	            {
+					return $this->respondWithError('Authentication failed! API token not match!');
+	            }
+        	}
+        	else 
+        	{
+        		return $this->respondWithError('User hasnt logged in yet or User not found!');
+        	}
     }
 
 }

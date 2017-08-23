@@ -11,6 +11,7 @@ class UserTransformer extends Transformer{
             'fullname' => $user->name,
             'email' => $user->email,
             'api_token' => $user->api_token,
+            'expired_date' => $user->expired_date,
         ];
 
     }

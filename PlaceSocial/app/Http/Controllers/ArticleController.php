@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\User;
 use App\Article;
 use Illuminate\Http\Request;
 
 class ArticleController extends Controller
 {
+    /*public function __construct(){
+        return $this->middleware('token');
+    }*/
+
     public function index()
     {
     	return Article::all();
@@ -15,7 +20,7 @@ class ArticleController extends Controller
 
     public function show(Article $article)
     {
-    	return $article;
+        return $article;
     }
 
     public function store(Request $request)
