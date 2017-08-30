@@ -22,12 +22,12 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 | API method endpoints
 |======================================================
 */
-Route::group(['middleware' => 'token'], function() {
+Route::group(['middleware' => ['token', 'role:user']], function() {
 	// read all records 
 	Route::get('/articles', 'ArticleController@index');
 
 	// show item's detail
-	Route::get('/articles/{article}', 'ArticleController@show');
+	Route::get('/articles/{article}', 'ArticleController@show');//->middleware('role:user');
 
 	//insert item
 	Route::post('/articles', 'ArticleController@store');
@@ -40,7 +40,6 @@ Route::group(['middleware' => 'token'], function() {
 	
 });
 
-Route::get('/logout', 'UserController@logout');
 /*
 |=============================================
 | API Authorization with token API
@@ -49,3 +48,5 @@ Route::get('/logout', 'UserController@logout');
     Route::post('/login', 'UserController@authenticate');
 
     Route::post('/register', 'UserController@register');
+
+    Route::get('/logout', 'UserController@logout');

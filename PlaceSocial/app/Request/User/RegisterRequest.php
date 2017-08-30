@@ -8,6 +8,11 @@ Class RegisterRequest{
 
 	private $message;
 
+	/**
+	*@description: Register validate method
+	*@param: request
+	*@return: boolean
+	**/
 	public function validator($request)
 	{
 		$rules = [

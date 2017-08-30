@@ -130,7 +130,7 @@ class UserController extends ApiController
             if ($user->api_token == null) 
             {
                 $user->api_token    = str_random(191);
-                $user->expired_date = Carbon::now()->addDays(1);
+                $user->expired_date = Carbon::now('Asia/Ho_Chi_Minh')->addDays(1);
                 $user->save();
 
                 // UserResponse

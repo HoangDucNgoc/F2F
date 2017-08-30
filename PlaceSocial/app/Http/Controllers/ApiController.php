@@ -19,12 +19,6 @@ class ApiController extends Controller
      *
      * @return void
      */
-
-    public function __construct()
-    {
-        $this->beforeFilter('auth', ['on' => 'post']);
-    }
-
     /**
      * @var int
      */

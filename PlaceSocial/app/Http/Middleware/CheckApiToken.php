@@ -26,7 +26,7 @@ class CheckApiToken
             $user = User::where('api_token', $token)->first();
             if($user)
             {
-                $currentDate = Carbon::now();
+                $currentDate = Carbon::now('Asia/Ho_Chi_Minh');
                 $expiredDate = $user->expired_date;
 
                 if($expiredDate->gte($currentDate))
