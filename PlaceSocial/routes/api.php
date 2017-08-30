@@ -22,22 +22,30 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 | API method endpoints
 |======================================================
 */
-Route::group(['middleware' => ['token', 'role:user']], function() {
-	// read all records 
-	Route::get('/articles', 'ArticleController@index');
+Route::group(['middleware' => 'token'], function() {
+	// Permission: admin
+	Route::group(['middleware' => 'role:admin'], function(){
 
-	// show item's detail
-	Route::get('/articles/{article}', 'ArticleController@show');//->middleware('role:user');
+		//insert item
+		Route::post('/articles', 'ArticleController@store');
 
-	//insert item
-	Route::post('/articles', 'ArticleController@store');
+		//update item
+		Route::post('/articles/{article}/update', 'ArticleController@update');
 
-	//update item
-	Route::post('/articles/{article}/update', 'ArticleController@update');
+		//delete item
+		Route::get('/articles/{article}/delete', 'ArticleController@delete');
+	});
 
-	//delete item
-	Route::get('/articles/{article}/delete', 'ArticleController@delete');
-	
+	// Permission: user
+	Route::group(['middleware' => 'role:user'], function() {
+
+		// read all records 
+		Route::get('/articles', 'ArticleController@index');
+
+		// show item's detail
+		Route::get('/articles/{article}', 'ArticleController@show');
+	});
+
 });
 
 /*
