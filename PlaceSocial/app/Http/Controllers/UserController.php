@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
-use Illuminate\Http\Request;
-use App\Http\Requests;
-use JWTAuth;
-use Response;
+// namespace libary
+use Hash;
+use App\Models\User;
 use App\Repository\Transformers\UserTransformer;
-use \Illuminate\Http\Response as Res;
-use Validator;
-use Tymon\JWTAuth\Exceptions\JWTException;
-
+use Carbon\Carbon;
+// namespace project
+use App\Request\User\LoginRequest;
+use App\Request\User\RegisterRequest;
+use App\Response\User\UserResponse;
+use Illuminate\Http\Request;
 
 class UserController extends ApiController
 {
@@ -20,7 +20,6 @@ class UserController extends ApiController
      * */
     protected $userTransformer;
 
-
     public function __construct(userTransformer $userTransformer)
     {
 
@@ -28,100 +27,24 @@ class UserController extends ApiController
 
     }
 
-
     /**
      * @description: Api user authenticate method
-     * @author: Adelekan David Aderemi
-     * @param: email, password
+     * @author: Tao
+     * @param: Request
      * @return: Json String response
      */
     public function authenticate(Request $request)
     {
 
-        $rules = array (
+        //$user         = new User();
+        $loginRequest = new LoginRequest();
 
-            'email' => 'required|email',
-            'password' => 'required',
-
-        );
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator-> fails()){
-
-            return $this->respondValidationError('Fields Validation Failed.', $validator->errors());
-
+        if (!$loginRequest->validator($request)) {
+            return $this->respondWithErrors($loginRequest->message());
         }
 
-        else{
-
-            $user = User::where('email', $request['email'])->first();
-
-            if($user){
-                $api_token = $user->api_token;
-
-                if ($api_token == NULL){
-                    return $this->_login($request['email'], $request['password']);
-                }
-
-                try{
-
-                    //$user = JWTAuth::toUser($api_token);
-
-                    return $this->respond([
-
-                        'status' => 'success',
-                        'status_code' => $this->getStatusCode(),
-                        'message' => 'Already logged in',
-                        'user' => $this->userTransformer->transform($user)
-
-                    ]);
-
-                }catch(JWTException $e){
-
-                    $user->api_token = NULL;
-                    $user->save();
-
-                    return $this->respondInternalError("Login Unsuccessful. An error occurred while performing an action!");
-
-                }
-            }
-            else{
-                return $this->respondWithError("Invalid Email or Password");
-            }
-
-        }
-
+        return $this->_login($request['email'], $request['password']);
     }
-
-
-    private function _login($email, $password)
-    {
-
-        $credentials = ['email' => $email, 'password' => $password];
-
-
-        if ( ! $token = JWTAuth::attempt($credentials)) {
-
-            return $this->respondWithError("User does not exist!");
-
-        }
-
-        $user = JWTAuth::toUser($token);
-
-        // create token with expired date
-        $user->authorizingToken();
-
-        return $this->respond([
-
-            'status' => 'success',
-            'status_code' => $this->getStatusCode(),
-            'message' => 'Login successful!',
-            'data' => $this->userTransformer->transform($user)
-
-        ]);
-    }
-
 
     /**
      * @description: Api user register method
@@ -131,74 +54,99 @@ class UserController extends ApiController
      */
     public function register(Request $request)
     {
+        $registerRequest = new RegisterRequest();
 
-        $rules = array (
-
-            'name' => 'required|max:255',
-            'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|min:6|confirmed',
-            'password_confirmation' => 'required|min:3'
-
-        );
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator-> fails()){
-
-            return $this->respondValidationError('Fields Validation Failed.', $validator->errors());
-
+        if(!$registerRequest->validator($request)){
+            return $this->respondWithErrors($registerRequest->message());
         }
 
-        else{
+        else {
 
             $user = User::create([
 
-                'name' => $request['name'],
-                'email' => $request['email'],
+                'name'     => $request['name'],
+                'email'    => $request['email'],
                 'password' => \Hash::make($request['password']),
 
             ]);
 
             return $this->_login($request['email'], $request['password']);
-            //return response()->json($user, 200);
         }
 
     }
 
-
     /**
      * @description: Api user logout method
-     * @author: Adelekan David Aderemi
-     * @param: null
+     * @author: Tao
+     * @param: Request
      * @return: Json String response
      */
     public function logout(Request $request)
     {
-        	if($accessToken = $request->header('Authorization'))
-        	{
-        		$user = User::where('api_token', $accessToken)->first();
+        if ($accessToken = $request->header('Authorization')) 
+        {
+            $user = User::where('api_token', $accessToken)->first();
 
-	            if($user)
-	            {
-					$user->disableAuthorization();
+            if ($user) 
+            {
+                $user->api_token = NULL;
+                $user->expired_date = NULL;
 
-	            	return $this->respond([
+                $user->save();
+                return $this->respond([
 
-	            		'status' => 'success',
-	            		'message' => 'User logged out successful!'
+                    'status'  => 'success',
+                    'message' => 'User logged out successful!',
 
-	            	]);
-	            }
-            
-	            else
-	            {
-					return $this->respondWithError('Authentication failed! API token not match!');
-	            }
-        	}
-        	else 
-        	{
-        		return $this->respondWithError('User hasnt logged in yet or User not found!');
-        	}
+                ]);
+            } 
+            else 
+            {
+                return $this->respondWithError('Authentication failed! API token not match!');
+            }
+        }
+        else
+        {
+            return $this->respondWithError('User hasnt logged in yet or User not found!');
+        }
+    }   
+
+    /**
+     * @description: Api user login private method
+     * @author: Tao
+     * @param: email, password
+     * @return: Json String response
+     */
+    private function _login($email, $password)
+    {
+        $user          = User::where('email', $email)->first();
+        $response      = new UserResponse();
+        $checkPassword = Hash::check($password, $user->password);
+
+        if ($user && $checkPassword) 
+        {
+        // logged yet?
+            // hasn't
+            if ($user->api_token == null) 
+            {
+                $user->api_token    = str_random(191);
+                $user->expired_date = Carbon::now()->addDays(1);
+                $user->save();
+
+                // UserResponse
+                return $this->respondWithData(
+                array(
+                    'user' => $response->newUser($user),
+                ));
+            }
+            // has logged
+            else 
+            {
+                return $this->respondWithError('Already logged in!');
+            }
+        }
+
+        return $this->respondWithError('Email or Password is not correct!');
     }
 
 }

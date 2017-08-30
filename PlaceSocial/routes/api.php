@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
-use App\Article;
+use App\Models\Article;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,10 +46,6 @@ Route::get('/logout', 'UserController@logout');
 | API Authorization with token API
 |=============================================
 */
-
-Route::group(['middleware' => 'cors', 'prefix' => '/v1'], function () {
-
     Route::post('/login', 'UserController@authenticate');
 
     Route::post('/register', 'UserController@register');
-});

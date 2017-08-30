@@ -2,7 +2,8 @@
 
 namespace App\Repository\Transformers;
 
-use App\User;
+use App\Models\User;
+
 class UserTransformer extends Transformer{
 
     public function transform($user){

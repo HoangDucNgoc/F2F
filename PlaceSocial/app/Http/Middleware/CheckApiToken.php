@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\ApiController;
 use Carbon\Carbon;
@@ -24,15 +24,19 @@ class CheckApiToken
         if($token)
         {
             $user = User::where('api_token', $token)->first();
-            
-            $currentDate = Carbon::now();
-            $expiredDate = $user->expired_date;
-
-            if($user && $expiredDate->gte($currentDate))
+            if($user)
             {
-                return $next($request);
-            }
-            else return response()->json(['message' => 'Authorization failed! Your token is out of date or not match!'], 404);
+                $currentDate = Carbon::now();
+                $expiredDate = $user->expired_date;
+
+                if($expiredDate->gte($currentDate))
+                {
+                    return $next($request);
+                }
+                
+                else return response()->json(['message' => 'Authorization failed! Your token is out of date!'], 404);
+            }           
+            else return response()->json(['message' => 'Authorization failed! Your token is not match!'], 404);
         }
         else return respondWithError('Unauthenticated!');
 
