@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
-use App\Article;
+use App\Models\Article;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,33 +23,38 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 |======================================================
 */
 Route::group(['middleware' => 'token'], function() {
-	// read all records 
-	Route::get('/articles', 'ArticleController@index');
+	// Permission: admin
+	Route::group(['middleware' => 'role:admin'], function(){
 
-	// show item's detail
-	Route::get('/articles/{article}', 'ArticleController@show');
+		//insert item
+		Route::post('/articles', 'ArticleController@store');
 
-	//insert item
-	Route::post('/articles', 'ArticleController@store');
+		//update item
+		Route::post('/articles/{article}/update', 'ArticleController@update');
 
-	//update item
-	Route::post('/articles/{article}/update', 'ArticleController@update');
+		//delete item
+		Route::get('/articles/{article}/delete', 'ArticleController@delete');
+	});
 
-	//delete item
-	Route::get('/articles/{article}/delete', 'ArticleController@delete');
-	
+	// Permission: user
+	Route::group(['middleware' => 'role:user'], function() {
+
+		// read all records 
+		Route::get('/articles', 'ArticleController@index');
+
+		// show item's detail
+		Route::get('/articles/{article}', 'ArticleController@show');
+	});
+
 });
 
-Route::get('/logout', 'UserController@logout');
 /*
 |=============================================
 | API Authorization with token API
 |=============================================
 */
-
-Route::group(['middleware' => 'cors', 'prefix' => '/v1'], function () {
-
     Route::post('/login', 'UserController@authenticate');
 
     Route::post('/register', 'UserController@register');
-});
+
+    Route::get('/logout', 'UserController@logout');

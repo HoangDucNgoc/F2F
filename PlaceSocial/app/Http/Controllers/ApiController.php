@@ -14,17 +14,11 @@ use \Illuminate\Http\Response as Res;
 class ApiController extends Controller
 {
 
-	/**
-	* Create a new auth controller instance
-	*
-	* @return void
-	*/
-
-    public function __construct()
-    {
-    	$this->beforeFilter('auth', ['on' => 'post']);
-    }
-
+    /**
+     * Create a new auth controller instance
+     *
+     * @return void
+     */
     /**
      * @var int
      */
@@ -37,7 +31,7 @@ class ApiController extends Controller
 
     public function getStatusCode()
     {
-    	return $this->statusCode;
+        return $this->statusCode;
     }
 
     /**
@@ -47,80 +41,83 @@ class ApiController extends Controller
 
     public function setStatusCode($statusCode)
     {
-    	$this->statusCode = $statusCode;
+        $this->statusCode = $statusCode;
 
-    	return $this;
+        return $this;
     }
 
     public function responseCreated($message, $data = null)
     {
-    	return $this->response([
-    		'status' => 'success',
-    		'status_code' => Res::HTTP_CREATED,
-    		'message' => $message,
-    		'data' => $data
-    	]);
+        return $this->response([
+            'status'      => 'success',
+            'status_code' => Res::HTTP_CREATED,
+            'message'     => $message,
+            'data'        => $data,
+        ]);
     }
 
-     /**
+    /**
      * @param Paginator $paginate
      * @param $data
      * @return mixed
      */
-    protected function respondWithPagination(Paginator $paginate, $data, $message)
+    public function respondWithPagination(Paginator $paginate, $data, $message)
     {
 
         $data = array_merge($data, [
             'paginator' => [
                 'total_count'  => $paginate->total(),
-                'total_pages' => ceil($paginate->total() / $paginate->perPage()),
+                'total_pages'  => ceil($paginate->total() / $paginate->perPage()),
                 'current_page' => $paginate->currentPage(),
-                'limit' => $paginate->perPage(),
-            ]
+                'limit'        => $paginate->perPage(),
+            ],
         ]);
 
         return $this->respond([
 
-            'status' => 'success',
+            'status'      => 'success',
             'status_code' => Res::HTTP_OK,
-            'message' => $message,
-            'data' => $data
+            'message'     => $message,
+            'data'        => $data,
 
         ]);
     }
 
-    public function respondNotFound($message = 'Not Found!'){
+    public function respondNotFound($message = 'Not Found!')
+    {
 
         return $this->respond([
 
-            'status' => 'error',
+            'status'      => 'error',
             'status_code' => Res::HTTP_NOT_FOUND,
-            'message' => $message,
+            'message'     => $message,
 
         ]);
 
     }
 
-    public function respondInternalError($message){
+    public function respondInternalError($message)
+    {
 
         return $this->respond([
 
-            'status' => 'error',
+            'status'      => 'error',
             'status_code' => Res::HTTP_INTERNAL_SERVER_ERROR,
-            'message' => $message,
+            'message'     => $message,
 
         ]);
 
     }
 
-    public function respondValidationError($message, $errors){
+    public function respondValidationError($message, $errors)
+    {
 
         return $this->respond([
 
-            'status' => 'error',
+            'status'      => 'error',
             'status_code' => Res::HTTP_UNPROCESSABLE_ENTITY,
-            'message' => $message,
-            'data' => $errors
+            'message'     => $message,
+            'data'        => $errors,
 
         ]);
 
@@ -133,13 +130,55 @@ class ApiController extends Controller
 
     }
 
+    /**
+     * format response with data
+     */
+    public function respondWithData($data)
+    {
+        return Response::json(
+            array(
+                'status' => 'success',
+                'data'   => $data,
+            ),
+            200
+        );
+    }
+
+    /**
+     * format response with message
+     */
+    public function respondWithErrorMessage($message)
+    {
+        return Response::json(
+            array(
+                'status'  => 'error',
+                'message' => array($message),
+            ),
+            400
+        );
+    }
+
+    /**
+     * format response whit errors
+     */
+    public function respondWithErrors($errors)
+    {
+        return Response::json(
+            array(
+                'status'  => 'error',
+                'message' => $errors,
+            ),
+            400
+        );
+    }
+
     public function respondWithError($message)
     {
         return $this->respond([
 
-            'status' => 'error',
+            'status'      => 'error',
             'status_code' => Res::HTTP_UNAUTHORIZED,
-            'message' => $message,
+            'message'     => $message,
 
         ]);
     }
